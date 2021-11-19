@@ -74,9 +74,9 @@ int main(int argc, char *argv[])
 
     EventEmitter e;
 
-    e.once("skata", func);
-    e.emit("skata");
-    e.emit("skata");
+    e.once("test", func);
+    e.emit("test");
+    e.emit("test");
 
     system("pause");
 
