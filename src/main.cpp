@@ -1,3 +1,4 @@
+#include <tuple>
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -14,12 +15,6 @@ enum listener_type
     ONCE
 };
 
-struct function_object
-{
-    listener_type type;
-    function_pointer callback;
-};
-
 class EventEmitter
 {
 public:
@@ -30,18 +25,14 @@ public:
     {
         std::lock_guard<std::mutex> lock(mtx);
 
-        function_object fo = {ON, callback};
-
-        this->events.insert(std::make_pair(eventName, fo));
+        this->events.emplace(std::piecewise_construct, eventName, std::make_tuple(ON, callback));
     }
 
     void once(std::string &&eventName, function_pointer callback)
     {
         std::lock_guard<std::mutex> lock(mtx);
 
-        function_object fo = {ONCE, callback};
-
-        this->events.insert(std::make_pair(eventName, fo));
+        this->events.emplace(std::piecewise_construct, eventName, std::make_tuple(ONCE, callback));
     }
 
     void emit(std::string &&eventName)
@@ -51,9 +42,9 @@ public:
         if (this->events.find(eventName) != this->events.end())
         {
 
-            this->events[eventName].callback();
+            std::get<1>(this->events[eventName])();
 
-            if (this->events[eventName].type == ONCE)
+            if (std::get<0>(this->events[eventName]) == ONCE)
             {
                 this->events.erase(eventName);
             }
@@ -61,7 +52,7 @@ public:
     }
 
 private:
-    std::unordered_map<std::string, function_object> events;
+    std::unordered_map<std::string, std::tuple<listener_type, function_pointer>> events;
 };
 
 void func()
