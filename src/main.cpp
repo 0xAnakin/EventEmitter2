@@ -25,14 +25,14 @@ public:
     {
         std::lock_guard<std::mutex> lock(mtx);
 
-        this->events.emplace(std::piecewise_construct, eventName, std::make_tuple(ON, callback));
+        this->events.emplace(eventName, std::make_tuple(ON, callback));
     }
 
     void once(std::string &&eventName, function_pointer callback)
     {
         std::lock_guard<std::mutex> lock(mtx);
 
-        this->events.emplace(std::piecewise_construct, eventName, std::make_tuple(ONCE, callback));
+        this->events.emplace(eventName, std::make_tuple(ONCE, callback));
     }
 
     void emit(std::string &&eventName)
@@ -65,9 +65,9 @@ int main(int argc, char *argv[])
 
     EventEmitter e;
 
-    e.once("skata", func);
-    e.emit("skata");
-    e.emit("skata");
+    e.once("test", func);
+    e.emit("test");
+    e.emit("test");
 
     system("pause");
 
